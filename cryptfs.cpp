@@ -1963,9 +1963,11 @@ static int cryptfs_restart_internal(int restart_main) {
             SLOGE("Failed to setexeccon");
             return -1;
         }
-        bool needs_cp = android::vold::cp_needsCheckpoint();
+        bool supportsCheckpoint = false;
+        android::vold::cp_supportsCheckpoint(supportsCheckpoint);
+        bool needs_cp = supportsCheckpoint && android::vold::cp_needsCheckpoint();
 #ifdef CONFIG_HW_DISK_ENCRYPTION
-        while ((mount_rc = fs_mgr_do_mount(&fstab_default, DATA_MNT_POINT, blkdev.data(), 0,
+        while ((mount_rc = fs_mgr_do_mount(&fstab_default, DATA_MNT_POINT, crypto_blkdev, 0,
                                            needs_cp, false)) != 0) {
 #else
         while ((mount_rc = fs_mgr_do_mount(&fstab_default, DATA_MNT_POINT, crypto_blkdev.data(), 0,
